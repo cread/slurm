@@ -363,7 +363,7 @@ static int _get_process_data_line(int in, prec_t *prec) {
 	prec->usec  = utime;
 	prec->ssec  = stime;
 	prec->vsize = vsize / 1024;	      /* convert from bytes to KB */
-	prec->rss   = rss * getpagesize() / 1024;/* convert from pages to KB */
+	prec->rss   = rss * pagesize;     /* convert from pages to KB */
 	prec->last_cpu = last_cpu;
 	return 1;
 }
