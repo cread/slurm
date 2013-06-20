@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  jobacct_gather_linux.c - slurm job accounting gather plugin for linux.
+ *  jobacct_gather_linux_common.h - slurm job accounting gather plugin for linux.
  *****************************************************************************
  *  Copyright (C) 2005 Hewlett-Packard Development Company, L.P.
  *  Written by Andy Riebs, <andy.riebs@hp.com>, who borrowed heavily
@@ -39,6 +39,9 @@
  *  Copyright (C) 2002 The Regents of the University of California.
 \*****************************************************************************/
 
+#ifndef _JOBACCT_GATHER_LINUX_COMMON_H
+#define _JOBACCT_GATHER_LINUX_COMMON_H
+
 #include <dirent.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -48,55 +51,36 @@
 #include "src/common/slurm_protocol_defs.h"
 #include "src/common/slurm_acct_gather_energy.h"
 #include "src/slurmd/common/proctrack.h"
-#include "jobacct_gather_linux_common.h"
 
-#define _DEBUG 0
+/* Other useful declarations */
 
-/*
- * These variables are required by the generic plugin interface.  If they
- * are not found in the plugin, the plugin loader will ignore it.
- *
- * plugin_name - a string giving a human-readable description of the
- * plugin.  There is no maximum length, but the symbol must refer to
- * a valid string.
- *
- * plugin_type - a string suggesting the type of the plugin or its
- * applicability to a particular form of data or method of data handling.
- * If the low-level plugin API is used, the contents of this string are
- * unimportant and may be anything.  SLURM uses the higher-level plugin
- * interface which requires this string to be of the form
- *
- *	<application>/<method>
- *
- * where <application> is a description of the intended application of
- * the plugin (e.g., "jobacct" for SLURM job completion logging) and <method>
- * is a description of how this plugin satisfies that application.  SLURM will
- * only load job completion logging plugins if the plugin_type string has a
- * prefix of "jobacct/".
- *
- * plugin_version - an unsigned 32-bit integer giving the version number
- * of the plugin.  If major and minor revisions are desired, the major
- * version number may be multiplied by a suitable magnitude constant such
- * as 100 or 1000.  Various SLURM versions will likely require a certain
- * minimum version for their plugins as the job accounting API
- * matures.
- */
-const char plugin_name[] = "Job accounting gather LINUX plugin";
-const char plugin_type[] = "jobacct_gather/linux";
-const uint32_t plugin_version = 200;
+typedef struct prec {	/* process record */
+	pid_t	pid;
+	pid_t	ppid;
+	int     usec;   /* user cpu time */
+	int     ssec;   /* system cpu time */
+	int     pages;  /* pages */
+	int	rss;	/* rss */
+	int	vsize;	/* virtual size */
+	int	act_cpufreq;	/* actual average cpu frequency */
+	int	last_cpu;	/* last cpu */
+} prec_t;
 
-bool _use_shared(void) {
-  return true;
-};
+static DIR  *slash_proc = NULL;
+static pthread_mutex_t reading_mutex = PTHREAD_MUTEX_INITIALIZER;
+static int cpunfo_frequency = 0;
 
-/*
- * init() is called when the plugin is loaded, before any other functions
- * are called.  Put global initialization here.
- */
-extern int init ( void )
-{
-	verbose("%s loaded", plugin_name);
+/* Finally, pre-define all local routines. */
 
-	return SLURM_SUCCESS;
-}
+static void _destroy_prec(void *object);
+static int  _is_a_lwp(uint32_t pid);
+static void _get_offspring_data(List prec_list, prec_t *ancestor, pid_t pid);
+static int  _get_process_data_line(int in, prec_t *prec);
+static int  _get_process_statm_line(int in, prec_t *prec);
+static int _get_sys_interface_freq_line(uint32_t cpu, char *filename,
+					char *sbuf );
+static uint32_t _update_weighted_freq(struct jobacctinfo *jobacct,
+				      char * sbuf);
+bool _use_shared(void);
 
+#endif

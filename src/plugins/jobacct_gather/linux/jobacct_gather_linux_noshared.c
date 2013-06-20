@@ -1,5 +1,5 @@
 /*****************************************************************************\
- *  jobacct_gather_linux.c - slurm job accounting gather plugin for linux.
+ *  jobacct_gather_linux_noshared.c - slurm job accounting gather plugin for linux.
  *****************************************************************************
  *  Copyright (C) 2005 Hewlett-Packard Development Company, L.P.
  *  Written by Andy Riebs, <andy.riebs@hp.com>, who borrowed heavily
@@ -81,12 +81,12 @@
  * minimum version for their plugins as the job accounting API
  * matures.
  */
-const char plugin_name[] = "Job accounting gather LINUX plugin";
-const char plugin_type[] = "jobacct_gather/linux";
+const char plugin_name[] = "Job accounting gather LINUX plugin - no shared memory";
+const char plugin_type[] = "jobacct_gather/linux_noshared";
 const uint32_t plugin_version = 200;
 
 bool _use_shared(void) {
-  return true;
+  return false;
 };
 
 /*
