@@ -4670,6 +4670,7 @@ _pack_slurm_ctl_conf_msg(slurm_ctl_conf_info_msg_t * build_ptr, Buf buffer,
 
 		packstr(build_ptr->job_acct_gather_freq, buffer);
 		packstr(build_ptr->job_acct_gather_type, buffer);
+		packstr(build_ptr->job_acct_gather_params, buffer);
 
 		packstr(build_ptr->job_ckpt_dir, buffer);
 
@@ -4886,6 +4887,7 @@ _pack_slurm_ctl_conf_msg(slurm_ctl_conf_info_msg_t * build_ptr, Buf buffer,
 
 		packstr(build_ptr->job_acct_gather_freq, buffer);
 		packstr(build_ptr->job_acct_gather_type, buffer);
+		packstr(build_ptr->job_acct_gather_params, buffer);
 
 		packstr(build_ptr->job_ckpt_dir, buffer);
 
@@ -5095,6 +5097,7 @@ _pack_slurm_ctl_conf_msg(slurm_ctl_conf_info_msg_t * build_ptr, Buf buffer,
 			uint16 = atoi(build_ptr->job_acct_gather_freq);
 		pack16(uint16, buffer);
 		packstr(build_ptr->job_acct_gather_type, buffer);
+		packstr(build_ptr->job_acct_gather_params, buffer);
 
 		packstr(build_ptr->job_ckpt_dir, buffer);
 
@@ -5354,6 +5357,8 @@ _unpack_slurm_ctl_conf_msg(slurm_ctl_conf_info_msg_t **build_buffer_ptr,
 		safe_unpackstr_xmalloc(&build_ptr->job_acct_gather_freq,
 				       &uint32_tmp, buffer);
 		safe_unpackstr_xmalloc(&build_ptr->job_acct_gather_type,
+				       &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&build_ptr->job_acct_gather_params,
 				       &uint32_tmp, buffer);
 
 		safe_unpackstr_xmalloc(&build_ptr->job_ckpt_dir,
@@ -5658,6 +5663,8 @@ _unpack_slurm_ctl_conf_msg(slurm_ctl_conf_info_msg_t **build_buffer_ptr,
 				       &uint32_tmp, buffer);
 		safe_unpackstr_xmalloc(&build_ptr->job_acct_gather_type,
 				       &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&build_ptr->job_acct_gather_params,
+				       &uint32_tmp, buffer);
 
 		safe_unpackstr_xmalloc(&build_ptr->job_ckpt_dir,
 				       &uint32_tmp, buffer);
@@ -5949,6 +5956,8 @@ _unpack_slurm_ctl_conf_msg(slurm_ctl_conf_info_msg_t **build_buffer_ptr,
 			build_ptr->job_acct_gather_freq =
 				xstrdup_printf("%u", uint16);
 		safe_unpackstr_xmalloc(&build_ptr->job_acct_gather_type,
+				       &uint32_tmp, buffer);
+		safe_unpackstr_xmalloc(&build_ptr->job_acct_gather_params,
 				       &uint32_tmp, buffer);
 
 		safe_unpackstr_xmalloc(&build_ptr->job_ckpt_dir,

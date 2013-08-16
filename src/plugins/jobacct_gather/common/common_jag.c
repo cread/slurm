@@ -261,6 +261,48 @@ static int _get_process_data_line(int in, jag_prec_t *prec) {
 	return 1;
 }
 
+/* _get_process_memory_line() - get line of data from /proc/<pid>/statm
+ *
+ * IN:	in - input file descriptor
+ * OUT:	prec - the destination for the data
+ *
+ * RETVAL:	==0 - no valid data
+ * 		!=0 - data are valid
+ *
+ * The *prec will mostly be filled in. We need to simply subtract the 
+ * amount of shared memory used by the process (in KB) from *prec->rss
+ * and return the updated struct.
+ *
+ */
+static int _get_process_memory_line(int in, jag_prec_t *prec) {
+  char sbuf[256];
+  int num_read, nvals;
+  long int size, rss, share, text, lib, data, dt;
+
+  debug("jobacct_gather_linux: Processing statm line...");
+  num_read = read(in, sbuf, (sizeof(sbuf) - 1));
+  if (num_read <= 0)
+    return 0;
+  sbuf[num_read] = '\0';
+
+  nvals = sscanf(sbuf,
+      "%ld %ld %ld %ld %ld %ld %ld",
+      &size, &rss, &share, &text, &lib, &data, &dt);
+  /* There are some additional fields, which we do not scan or use */
+  if (nvals != 7)
+    return 0;
+
+  /* If shared > rss then there is a problem, give up... */
+  if (share > rss) {
+    debug("jobacct_gather_linux: share > rss - bail!");
+    return 0;
+  }
+
+  /* Copy the values that slurm records into our data structure */
+  prec->rss = (rss - share) * my_pagesize; /* convert from pages to KB */
+  return 1;
+}
+
 /* _get_process_io_data_line() - get line of data from /proc/<pid>/io
  *
  * IN:	in - input file descriptor
@@ -306,6 +348,8 @@ static void _handle_stats(
 {
 	FILE *stat_fp = NULL;
 	FILE *io_fp = NULL;
+  FILE *statm_fp = NULL;
+  char *proc_statm_file[256];  /* Allow ~20x extra length */
 	int fd, fd2;
 	jag_prec_t *prec = NULL;
 
@@ -324,8 +368,11 @@ static void _handle_stats(
 	fd = fileno(stat_fp);
 	fcntl(fd, F_SETFD, FD_CLOEXEC);
 
+  // TODO: if not counting shared open /proc/<pid>/statm
+
 	prec = xmalloc(sizeof(jag_prec_t));
 	if (_get_process_data_line(fd, prec)) {
+    // TODO: if not counting shared call _get_process_memory_line
 		list_append(prec_list, prec);
 		if ((io_fp = fopen(proc_io_file, "r"))) {
 			fd2 = fileno(io_fp);

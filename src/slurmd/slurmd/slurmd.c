@@ -916,6 +916,8 @@ _read_config(void)
 		      xstrdup(cf->acct_gather_profile_type));
 	_free_and_set(&conf->job_acct_gather_type,
 		      xstrdup(cf->job_acct_gather_type));
+	_free_and_set(&conf->job_acct_gather_params,
+		      xstrdup(cf->job_acct_gather_params));
 
 	if ( (conf->node_name == NULL) ||
 	     (conf->node_name[0] == '\0') )
@@ -1141,6 +1143,7 @@ _destroy_conf(void)
 		xfree(conf->hostname);
 		xfree(conf->job_acct_gather_freq);
 		xfree(conf->job_acct_gather_type);
+		xfree(conf->job_acct_gather_params);
 		xfree(conf->logfile);
 		xfree(conf->node_name);
 		xfree(conf->node_addr);
